@@ -8,6 +8,11 @@ on:
         required: true
         default: false
         type: boolean
+      reuse_render_run_id:
+        description: Optional completed workflow run ID whose successful worldlens-* render artifacts should be reused.
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -105,6 +110,7 @@ jobs:
   render-world:
     name: Render ${{ matrix.world.branch }}
     needs: discover-worlds
+    if: ${{ inputs.reuse_render_run_id == '' }}
     runs-on: windows-2022
     timeout-minutes: 330
     strategy:
@@ -247,6 +253,7 @@ jobs:
     needs:
       - discover-worlds
       - render-world
+    if: ${{ always() && needs.discover-worlds.result == 'success' && (needs.render-world.result == 'success' || inputs.reuse_render_run_id != '') }}
     runs-on: windows-2022
     timeout-minutes: 60
     env:
@@ -264,6 +271,8 @@ jobs:
           pattern: worldlens-*
           path: assembled
           merge-multiple: true
+          run-id: ${{ inputs.reuse_render_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download and verify BlueMap CLI
         shell: pwsh
@@ -312,11 +321,11 @@ jobs:
           Move-Item -LiteralPath assembled/maps -Destination site/maps
           $worlds = $env:WORLDS_JSON | ConvertFrom-Json
           foreach ($world in $worlds) {
-            @"
-            name: "$($world.branch)"
-            sorting: $($world.sorting)
-            storage: "file"
-            "@ | Set-Content -LiteralPath "config/maps/$($world.map_id).conf" -Encoding utf8
+            @(
+              "name: `"$($world.branch)`""
+              "sorting: $($world.sorting)"
+              'storage: "file"'
+            ) | Set-Content -LiteralPath "config/maps/$($world.map_id).conf" -Encoding utf8
           }
           java -jar $jar -c config -g -s
           if ($LASTEXITCODE -ne 0) {
