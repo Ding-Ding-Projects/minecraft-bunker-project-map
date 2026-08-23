@@ -377,6 +377,7 @@ jobs:
   deploy-pages:
     name: Deploy BlueMap Pages
     needs: assemble-bluemap
+    if: ${{ always() && needs.assemble-bluemap.result == 'success' }}
     runs-on: windows-2022
     environment:
       name: github-pages
