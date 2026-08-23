@@ -1,0 +1,387 @@
+name: Render WorldLens BlueMap Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      accept_mojang_download:
+        description: I accept Mojang's EULA, own Minecraft Java Edition, and authorize BlueMap to download the Minecraft client resources needed for rendering.
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: worldlens-bluemap-pages
+  cancel-in-progress: false
+
+env:
+  BLUEMAP_VERSION: '5.23'
+  BLUEMAP_SHA256: ebdb33821b127505be94599555cb16bb9b46c8f70aa22283d314cdb829b47a54
+
+jobs:
+  discover-worlds:
+    name: Discover branch worlds
+    runs-on: windows-2022
+    outputs:
+      worlds: ${{ steps.discover.outputs.worlds }}
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Require explicit Mojang resource authorization
+        shell: pwsh
+        env:
+          ACCEPT_MOJANG_DOWNLOAD: ${{ inputs.accept_mojang_download }}
+        run: |
+          if ($env:ACCEPT_MOJANG_DOWNLOAD -ne 'true') {
+            throw 'Rendering requires the dispatching user to accept the Mojang download statement.'
+          }
+
+      - name: Discover branches containing worlds
+        id: discover
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $headers = @{
+            Accept = 'application/vnd.github+json'
+            Authorization = "Bearer $env:GH_TOKEN"
+            'X-GitHub-Api-Version' = '2022-11-28'
+          }
+          $repository = $env:GITHUB_REPOSITORY
+          $branches = @(gh api --paginate "repos/$repository/branches?per_page=100" --jq '.[].name')
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Unable to enumerate repository branches.'
+          }
+          $worlds = [System.Collections.Generic.List[object]]::new()
+          $seenIds = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+          $skipped = [System.Collections.Generic.List[string]]::new()
+          $sorting = 0
+          foreach ($branch in ($branches | Sort-Object)) {
+            $encodedBranch = [Uri]::EscapeDataString($branch)
+            $uri = "https://api.github.com/repos/$repository/contents/world/level.dat?ref=$encodedBranch"
+            try {
+              $null = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+            }
+            catch {
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                $skipped.Add($branch)
+                continue
+              }
+              throw
+            }
+            $sha = gh api "repos/$repository/commits/$encodedBranch" --jq .sha
+            if ($LASTEXITCODE -ne 0 -or $sha -notmatch '^[0-9a-f]{40}$') {
+              throw "Unable to resolve commit for branch '$branch'."
+            }
+            $mapId = ($branch.ToLowerInvariant() -replace '[^a-z0-9_-]+', '_').Trim('_')
+            if ([string]::IsNullOrWhiteSpace($mapId)) {
+              throw "Branch '$branch' cannot be converted to a BlueMap map identifier."
+            }
+            if (-not $seenIds.Add($mapId)) {
+              throw "BlueMap map identifier collision for '$branch' at '$mapId'."
+            }
+            $worlds.Add([ordered]@{
+              branch = $branch
+              sha = $sha
+              map_id = $mapId
+              sorting = $sorting
+            })
+            $sorting++
+          }
+          if ($worlds.Count -eq 0) {
+            throw 'No branch contains world/level.dat.'
+          }
+          $json = ConvertTo-Json @($worlds) -Compress
+          "worlds=$json" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "## BlueMap world discovery" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Selectable worlds: $($worlds.Count)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          if ($skipped.Count -gt 0) {
+            "Skipped without world/level.dat: $($skipped -join ', ')" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+
+  render-world:
+    name: Render ${{ matrix.world.branch }}
+    needs: discover-worlds
+    runs-on: windows-2022
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        world: ${{ fromJSON(needs.discover-worlds.outputs.worlds) }}
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out exact world snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.world.sha }}
+          fetch-depth: 1
+
+      - name: Install Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Download and verify BlueMap CLI
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path tools | Out-Null
+          gh release download "v$env:BLUEMAP_VERSION" --repo BlueMap-Minecraft/BlueMap --pattern "bluemap-$env:BLUEMAP_VERSION-cli.jar" --dir tools
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Unable to download the pinned BlueMap CLI release.'
+          }
+          $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
+          $actual = (Get-FileHash -LiteralPath $jar -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $env:BLUEMAP_SHA256) {
+            throw "BlueMap CLI digest mismatch: expected $env:BLUEMAP_SHA256, received $actual."
+          }
+
+      - name: Configure branch map
+        shell: pwsh
+        env:
+          WORLD_BRANCH: ${{ matrix.world.branch }}
+          WORLD_MAP_ID: ${{ matrix.world.map_id }}
+          WORLD_SORTING: ${{ matrix.world.sorting }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
+          java -jar $jar -c config
+          if ($LASTEXITCODE -ne 0) {
+            throw 'BlueMap failed to generate its configuration.'
+          }
+          Remove-Item -LiteralPath config/maps/end.conf,config/maps/nether.conf,config/maps/overworld.conf -Force
+          @"
+          accept-download: true
+          data: "data"
+          render-thread-count: 3
+          scan-for-mod-resources: true
+          metrics: false
+          log: {
+            file: "data/logs/debug.log"
+            append: false
+          }
+          "@ | Set-Content -LiteralPath config/core.conf -Encoding utf8
+          @"
+          enabled: true
+          webroot: "render-output"
+          update-settings-file: true
+          use-cookies: true
+          default-to-flat-view: true
+          client-decompression: true
+          "@ | Set-Content -LiteralPath config/webapp.conf -Encoding utf8
+          @"
+          storage-type: file
+          root: "render-output/maps"
+          compression: gzip
+          "@ | Set-Content -LiteralPath config/storages/file.conf -Encoding utf8
+          @"
+          world: "world"
+          dimension: "minecraft:overworld"
+          name: "$env:WORLD_BRANCH"
+          sorting: $env:WORLD_SORTING
+          start-pos: { x: 0, z: 0 }
+          remove-caves-below-y: 55
+          min-inhabited-time: 0
+          render-edges: true
+          enable-perspective-view: false
+          enable-flat-view: true
+          enable-free-flight-view: false
+          enable-hires: false
+          storage: "file"
+          ignore-missing-light-data: false
+          marker-sets: {}
+          "@ | Set-Content -LiteralPath "config/maps/$env:WORLD_MAP_ID.conf" -Encoding utf8
+
+      - name: Render branch world with BlueMap
+        shell: pwsh
+        env:
+          WORLD_BRANCH: ${{ matrix.world.branch }}
+          WORLD_MAP_ID: ${{ matrix.world.map_id }}
+          WORLD_SHA: ${{ matrix.world.sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
+          java -Xmx5G -jar $jar -c config -r -m $env:WORLD_MAP_ID
+          if ($LASTEXITCODE -ne 0) {
+            throw "BlueMap render failed for branch '$env:WORLD_BRANCH'."
+          }
+          $mapRoot = "render-output/maps/$env:WORLD_MAP_ID"
+          if (-not (Test-Path -LiteralPath $mapRoot -PathType Container)) {
+            throw "BlueMap output is missing for branch '$env:WORLD_BRANCH'."
+          }
+          $fileCount = @(Get-ChildItem -LiteralPath $mapRoot -Recurse -File).Count
+          $bytes = (Get-ChildItem -LiteralPath $mapRoot -Recurse -File | Measure-Object Length -Sum).Sum
+          if ($fileCount -eq 0 -or $bytes -le 0) {
+            throw "BlueMap output is empty for branch '$env:WORLD_BRANCH'."
+          }
+          $manifest = [ordered]@{
+            branch = $env:WORLD_BRANCH
+            sha = $env:WORLD_SHA
+            map_id = $env:WORLD_MAP_ID
+            files = $fileCount
+            bytes = $bytes
+            bluemap_version = $env:BLUEMAP_VERSION
+          } | ConvertTo-Json
+          $artifactRoot = "artifact-$env:WORLD_MAP_ID"
+          New-Item -ItemType Directory -Force -Path "$artifactRoot/maps" | Out-Null
+          Move-Item -LiteralPath $mapRoot -Destination "$artifactRoot/maps/$env:WORLD_MAP_ID"
+          $manifest | Set-Content -LiteralPath "$artifactRoot/$env:WORLD_MAP_ID.manifest.json" -Encoding utf8
+          "Branch: $env:WORLD_BRANCH" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Commit: $env:WORLD_SHA" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Map ID: $env:WORLD_MAP_ID" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Rendered files: $fileCount" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Rendered bytes: $bytes" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
+      - name: Upload rendered map storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldlens-${{ matrix.world.map_id }}
+          path: artifact-${{ matrix.world.map_id }}
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  assemble-bluemap:
+    name: Assemble native BlueMap web host
+    needs:
+      - discover-worlds
+      - render-world
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Install Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Download rendered map storages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: worldlens-*
+          path: assembled
+          merge-multiple: true
+
+      - name: Download and verify BlueMap CLI
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path tools | Out-Null
+          gh release download "v$env:BLUEMAP_VERSION" --repo BlueMap-Minecraft/BlueMap --pattern "bluemap-$env:BLUEMAP_VERSION-cli.jar" --dir tools
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Unable to download the pinned BlueMap CLI release.'
+          }
+          $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
+          $actual = (Get-FileHash -LiteralPath $jar -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $env:BLUEMAP_SHA256) {
+            throw "BlueMap CLI digest mismatch: expected $env:BLUEMAP_SHA256, received $actual."
+          }
+
+      - name: Generate BlueMap host and native world selector
+        shell: pwsh
+        env:
+          WORLDS_JSON: ${{ needs.discover-worlds.outputs.worlds }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
+          java -jar $jar -c config
+          if ($LASTEXITCODE -ne 0) {
+            throw 'BlueMap failed to generate assembly configuration.'
+          }
+          Remove-Item -LiteralPath config/maps/end.conf,config/maps/nether.conf,config/maps/overworld.conf -Force
+          @"
+          accept-download: false
+          data: "data"
+          render-thread-count: 1
+          scan-for-mod-resources: false
+          metrics: false
+          "@ | Set-Content -LiteralPath config/core.conf -Encoding utf8
+          @"
+          enabled: true
+          webroot: "site"
+          update-settings-file: true
+          use-cookies: true
+          default-to-flat-view: true
+          client-decompression: true
+          "@ | Set-Content -LiteralPath config/webapp.conf -Encoding utf8
+          @"
+          storage-type: file
+          root: "site/maps"
+          compression: gzip
+          "@ | Set-Content -LiteralPath config/storages/file.conf -Encoding utf8
+          New-Item -ItemType Directory -Force -Path site | Out-Null
+          Move-Item -LiteralPath assembled/maps -Destination site/maps
+          $worlds = $env:WORLDS_JSON | ConvertFrom-Json
+          foreach ($world in $worlds) {
+            @"
+            name: "$($world.branch)"
+            sorting: $($world.sorting)
+            storage: "file"
+            "@ | Set-Content -LiteralPath "config/maps/$($world.map_id).conf" -Encoding utf8
+          }
+          java -jar $jar -c config -g -s
+          if ($LASTEXITCODE -ne 0) {
+            throw 'BlueMap failed to generate the static web host and settings.'
+          }
+          New-Item -ItemType File -Force -Path site/.nojekyll | Out-Null
+
+      - name: Verify selectable maps and Pages size
+        shell: pwsh
+        env:
+          WORLDS_JSON: ${{ needs.discover-worlds.outputs.worlds }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path -LiteralPath site/index.html -PathType Leaf)) {
+            throw 'BlueMap index.html is missing.'
+          }
+          if (-not (Test-Path -LiteralPath site/settings.json -PathType Leaf)) {
+            throw 'BlueMap settings.json is missing.'
+          }
+          $settings = Get-Content -Raw -LiteralPath site/settings.json | ConvertFrom-Json
+          $expected = @($env:WORLDS_JSON | ConvertFrom-Json | ForEach-Object { $_.map_id } | Sort-Object)
+          $actual = @($settings.maps | Sort-Object)
+          if (($expected -join "`n") -ne ($actual -join "`n")) {
+            throw "BlueMap selector mismatch. Expected '$($expected -join ', ')'; received '$($actual -join ', ')'."
+          }
+          foreach ($mapId in $expected) {
+            if (-not (Test-Path -LiteralPath "site/maps/$mapId" -PathType Container)) {
+              throw "Rendered map storage '$mapId' is missing."
+            }
+          }
+          $files = @(Get-ChildItem -LiteralPath site -Recurse -File)
+          $bytes = ($files | Measure-Object Length -Sum).Sum
+          if ($bytes -ge 1GB) {
+            throw "BlueMap site is $bytes bytes and exceeds the GitHub Pages 1 GiB limit."
+          }
+          "## BlueMap Pages host" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Selectable maps: $($expected.Count)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Files: $($files.Count)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Bytes: $bytes" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload BlueMap Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy-pages:
+    name: Deploy BlueMap Pages
+    needs: assemble-bluemap
+    runs-on: windows-2022
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy BlueMap host
+        id: deployment
+        uses: actions/deploy-pages@v4
