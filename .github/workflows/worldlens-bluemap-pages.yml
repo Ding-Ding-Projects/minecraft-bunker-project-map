@@ -150,13 +150,7 @@ jobs:
           WORLD_SORTING: ${{ matrix.world.sorting }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
-          java -jar $jar -c config
-          if (-not (Test-Path -LiteralPath config/core.conf -PathType Leaf) -or
-              -not (Test-Path -LiteralPath config/maps/overworld.conf -PathType Leaf)) {
-            throw 'BlueMap did not generate the expected configuration files.'
-          }
-          Remove-Item -LiteralPath config/maps/end.conf,config/maps/nether.conf,config/maps/overworld.conf -Force
+          New-Item -ItemType Directory -Force -Path config/maps,config/storages | Out-Null
           @"
           accept-download: true
           data: "data"
@@ -293,12 +287,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
-          java -jar $jar -c config
-          if (-not (Test-Path -LiteralPath config/core.conf -PathType Leaf) -or
-              -not (Test-Path -LiteralPath config/maps/overworld.conf -PathType Leaf)) {
-            throw 'BlueMap did not generate the expected assembly configuration files.'
-          }
-          Remove-Item -LiteralPath config/maps/end.conf,config/maps/nether.conf,config/maps/overworld.conf -Force
+          New-Item -ItemType Directory -Force -Path config/maps,config/storages | Out-Null
           @"
           accept-download: false
           data: "data"
