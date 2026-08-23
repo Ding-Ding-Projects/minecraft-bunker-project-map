@@ -1,0 +1,104 @@
+{
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2026-03-01 14:13:08 +0100"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:badlands": "2026-03-01 14:35:16 +0100",
+      "minecraft:flower_forest": "2026-03-01 14:24:14 +0100",
+      "minecraft:beach": "2026-03-01 14:22:25 +0100",
+      "minecraft:dark_forest": "2026-03-01 15:06:34 +0100",
+      "minecraft:forest": "2026-03-01 14:22:22 +0100",
+      "minecraft:mangrove_swamp": "2026-03-01 15:06:36 +0100",
+      "minecraft:deep_ocean": "2026-03-01 14:21:46 +0100",
+      "minecraft:river": "2026-03-01 14:22:45 +0100",
+      "minecraft:lukewarm_ocean": "2026-03-01 14:17:33 +0100",
+      "minecraft:snowy_plains": "2026-03-01 14:23:45 +0100",
+      "minecraft:stony_shore": "2026-03-01 14:57:43 +0100",
+      "minecraft:eroded_badlands": "2026-03-01 14:35:31 +0100",
+      "minecraft:desert": "2026-03-01 14:13:09 +0100",
+      "minecraft:windswept_forest": "2026-03-01 14:24:09 +0100",
+      "minecraft:ocean": "2026-03-01 14:15:35 +0100",
+      "minecraft:jungle": "2026-03-01 14:55:35 +0100",
+      "minecraft:sunflower_plains": "2026-03-01 14:57:20 +0100",
+      "minecraft:swamp": "2026-03-01 14:26:06 +0100",
+      "minecraft:birch_forest": "2026-03-01 14:23:42 +0100",
+      "minecraft:windswept_hills": "2026-03-01 15:23:46 +0100",
+      "minecraft:windswept_savanna": "2026-03-01 14:26:18 +0100",
+      "minecraft:plains": "2026-03-01 14:24:17 +0100",
+      "minecraft:warm_ocean": "2026-03-01 14:24:11 +0100",
+      "minecraft:deep_lukewarm_ocean": "2026-03-01 15:47:08 +0100"
+    },
+    "done": false
+  },
+  "minecraft:recipes/transportation/mangrove_boat": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/acacia_boat": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/cherry_boat": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/bamboo_raft": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/spruce_boat": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/birch_boat": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/oak_boat": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/jungle_boat": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/dark_oak_boat": {
+    "criteria": {
+      "in_water": "2026-03-01 14:16:20 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/wolf_armor": {
+    "criteria": {
+      "has_armadillo_scute": "2026-03-01 14:43:16 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/black_dye": {
+    "criteria": {
+      "has_ink_sac": "2026-03-01 14:43:57 +0100"
+    },
+    "done": true
+  },
+  "DataVersion": 3955
+}
