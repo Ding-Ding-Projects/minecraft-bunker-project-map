@@ -6234,7 +6234,6 @@
   },
   "minecraft:nether/explore_nether": {
     "criteria": {
-      "minecraft:nether_wastes": "2026-05-30 19:51:01 -0400",
       "minecraft:basalt_deltas": "2025-10-16 14:15:13 -0400"
     },
     "done": false
@@ -6374,30 +6373,6 @@
   "minecraft:recipes/building_blocks/cherry_wood": {
     "criteria": {
       "has_log": "2026-02-14 19:24:59 -0500"
-    },
-    "done": true
-  },
-  "minecraft:recipes/building_blocks/waxed_weathered_copper_door_from_honeycomb": {
-    "criteria": {
-      "has_weathered_copper_door": "2026-03-07 20:27:44 -0500"
-    },
-    "done": true
-  },
-  "minecraft:recipes/decorations/blue_glazed_terracotta": {
-    "criteria": {
-      "has_blue_terracotta": "2026-05-08 21:09:35 -0400"
-    },
-    "done": true
-  },
-  "minecraft:recipes/misc/vex_armor_trim_smithing_template_smithing_trim": {
-    "criteria": {
-      "has_smithing_trim_template": "2026-05-17 21:30:01 -0400"
-    },
-    "done": true
-  },
-  "minecraft:recipes/misc/vex_armor_trim_smithing_template": {
-    "criteria": {
-      "has_vex_armor_trim_smithing_template": "2026-05-17 21:30:01 -0400"
     },
     "done": true
   },

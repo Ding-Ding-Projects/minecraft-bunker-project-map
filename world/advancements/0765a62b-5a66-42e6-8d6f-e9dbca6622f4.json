@@ -1,7 +1,25 @@
 {
+  "minecraft:recipes/transportation/mangrove_boat": {
+    "criteria": {
+      "in_water": "2026-02-07 21:34:23 +0100"
+    },
+    "done": true
+  },
   "minecraft:recipes/decorations/crafting_table": {
     "criteria": {
       "unlock_right_away": "2026-02-07 21:25:45 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/acacia_boat": {
+    "criteria": {
+      "in_water": "2026-02-07 21:34:23 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/cherry_boat": {
+    "criteria": {
+      "in_water": "2026-02-07 21:34:23 +0100"
     },
     "done": true
   },
@@ -19,24 +37,6 @@
       "minecraft:deep_lukewarm_ocean": "2026-02-07 21:35:18 +0100"
     },
     "done": false
-  },
-  "minecraft:recipes/transportation/mangrove_boat": {
-    "criteria": {
-      "in_water": "2026-02-07 21:34:23 +0100"
-    },
-    "done": true
-  },
-  "minecraft:recipes/transportation/acacia_boat": {
-    "criteria": {
-      "in_water": "2026-02-07 21:34:23 +0100"
-    },
-    "done": true
-  },
-  "minecraft:recipes/transportation/cherry_boat": {
-    "criteria": {
-      "in_water": "2026-02-07 21:34:23 +0100"
-    },
-    "done": true
   },
   "minecraft:recipes/transportation/bamboo_raft": {
     "criteria": {
