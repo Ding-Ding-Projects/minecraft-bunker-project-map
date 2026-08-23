@@ -1,0 +1,171 @@
+name: Publish branch world downloads
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover-world-branches:
+    name: Discover branches with worlds
+    runs-on: windows-2022
+    outputs:
+      branches: ${{ steps.discover.outputs.branches }}
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Discover branch worlds
+        id: discover
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $headers = @{
+            Accept = 'application/vnd.github+json'
+            Authorization = "Bearer $env:GH_TOKEN"
+            'X-GitHub-Api-Version' = '2022-11-28'
+          }
+          $repository = $env:GITHUB_REPOSITORY
+          $branches = gh api --paginate --slurp "repos/$repository/branches?per_page=100" --jq 'add | map(.name)'
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Unable to enumerate repository branches.'
+          }
+          $names = $branches | ConvertFrom-Json
+          $worldBranches = [System.Collections.Generic.List[string]]::new()
+          $skipped = [System.Collections.Generic.List[string]]::new()
+          foreach ($branch in $names) {
+            $encodedBranch = [Uri]::EscapeDataString($branch)
+            $uri = "https://api.github.com/repos/$repository/contents/world/level.dat?ref=$encodedBranch"
+            try {
+              $null = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+              $worldBranches.Add($branch)
+            }
+            catch {
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                $skipped.Add($branch)
+              }
+              else {
+                throw
+              }
+            }
+          }
+          if ($worldBranches.Count -eq 0) {
+            throw 'No branch contains world/level.dat.'
+          }
+          $matrix = ConvertTo-Json @($worldBranches) -Compress
+          "branches=$matrix" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "## Branch world discovery" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "World branches: $($worldBranches.Count)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          if ($skipped.Count -gt 0) {
+            "Skipped without world/level.dat: $($skipped -join ', ')" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+
+  publish-world:
+    name: Publish ${{ matrix.branch }} world
+    needs: discover-world-branches
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        branch: ${{ fromJSON(needs.discover-world-branches.outputs.branches) }}
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out branch snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 1
+
+      - name: Build and publish world ZIP
+        shell: pwsh
+        env:
+          WORLD_BRANCH: ${{ matrix.branch }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $started = [DateTime]::UtcNow
+          if (-not (Test-Path -LiteralPath 'world/level.dat' -PathType Leaf)) {
+            throw "Branch '$env:WORLD_BRANCH' does not contain world/level.dat."
+          }
+          $sha = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0 -or $sha -notmatch '^[0-9a-f]{40}$') {
+            throw 'Unable to resolve the checked-out commit.'
+          }
+          $shortSha = $sha.Substring(0, 12)
+          $slug = ($env:WORLD_BRANCH.ToLowerInvariant() -replace '[^a-z0-9._-]+', '-')
+          $slug = $slug.Trim('-')
+          if ([string]::IsNullOrWhiteSpace($slug)) {
+            throw "Branch '$env:WORLD_BRANCH' cannot be converted to a safe release name."
+          }
+          $zipName = "minecraft-bunker-world-$slug-$shortSha.zip"
+          $zipPath = Join-Path $env:RUNNER_TEMP $zipName
+          tar.exe -a -c -f $zipPath --exclude='world/session.lock' --exclude='world/versions' world
+          if ($LASTEXITCODE -ne 0) {
+            throw "ZIP creation failed for branch '$env:WORLD_BRANCH'."
+          }
+          if (-not (Test-Path -LiteralPath $zipPath -PathType Leaf)) {
+            throw "ZIP output is missing for branch '$env:WORLD_BRANCH'."
+          }
+          $entries = @(tar.exe -tf $zipPath)
+          if ($LASTEXITCODE -ne 0) {
+            throw "ZIP validation failed for branch '$env:WORLD_BRANCH'."
+          }
+          if ($entries -notcontains 'world/level.dat') {
+            throw "ZIP for branch '$env:WORLD_BRANCH' is missing world/level.dat."
+          }
+          if ($entries -contains 'world/session.lock') {
+            throw "ZIP for branch '$env:WORLD_BRANCH' contains the transient session lock."
+          }
+          if ($entries | Where-Object { $_ -like 'world/versions/*' }) {
+            throw "ZIP for branch '$env:WORLD_BRANCH' contains server runtime JARs."
+          }
+          $zip = Get-Item -LiteralPath $zipPath
+          if ($zip.Length -le 0 -or $zip.Length -ge 2GB) {
+            throw "ZIP size $($zip.Length) bytes is outside the supported release-asset range."
+          }
+          $digest = (Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          $completed = [DateTime]::UtcNow
+          $duration = $completed - $started
+          $durationText = '{0:00}:{1:00}:{2:00}' -f [math]::Floor($duration.TotalHours), $duration.Minutes, $duration.Seconds
+          $tag = "world-$slug-$shortSha"
+          $notesPath = Join-Path $env:RUNNER_TEMP "release-$slug.md"
+          @"
+          # World download: $env:WORLD_BRANCH
+
+          This release contains the tracked `world/` directory from branch `$env:WORLD_BRANCH` at commit `$sha`.
+
+          - Archive: `$zipName`
+          - SHA-256: `$digest`
+          - Uncompressed server runtime JARs: excluded
+          - Transient `world/session.lock`: excluded
+          - Packaging started: $($started.ToString('o'))
+          - Packaging completed: $($completed.ToString('o'))
+          - Packaging duration: $durationText
+
+          Extract the ZIP and place the `world` folder in the desired Minecraft server directory while the server is stopped.
+          "@ | Set-Content -LiteralPath $notesPath -Encoding utf8
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            $existingTarget = gh release view $tag --repo $env:GITHUB_REPOSITORY --json targetCommitish --jq .targetCommitish
+            if ($existingTarget -ne $sha) {
+              throw "Existing release '$tag' targets '$existingTarget' instead of '$sha'."
+            }
+            gh release upload $tag $zipPath --repo $env:GITHUB_REPOSITORY --clobber
+            if ($LASTEXITCODE -ne 0) {
+              throw "Unable to replace the ZIP asset on release '$tag'."
+            }
+            gh release edit $tag --repo $env:GITHUB_REPOSITORY --notes-file $notesPath --title "World download - $env:WORLD_BRANCH - $shortSha"
+          }
+          else {
+            gh release create $tag $zipPath --repo $env:GITHUB_REPOSITORY --target $sha --title "World download - $env:WORLD_BRANCH - $shortSha" --notes-file $notesPath --latest=false
+          }
+          if ($LASTEXITCODE -ne 0) {
+            throw "Release publication failed for branch '$env:WORLD_BRANCH'."
+          }
+          "## Published world ZIP" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Branch: $env:WORLD_BRANCH" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Commit: $sha" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Archive: $zipName" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "Bytes: $($zip.Length)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          "SHA-256: $digest" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
