@@ -1,0 +1,27 @@
+{
+  "minecraft:recipes/decorations/glow_item_frame": {
+    "criteria": {
+      "has_item_frame": "2025-02-24 19:17:24 +0100"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2025-02-24 19:10:41 +0100"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:beach": "2025-02-24 19:11:04 +0100",
+      "minecraft:forest": "2025-02-24 19:11:29 +0100",
+      "minecraft:sunflower_plains": "2025-02-24 19:25:22 +0100",
+      "minecraft:river": "2025-02-24 19:12:22 +0100",
+      "minecraft:lukewarm_ocean": "2025-02-24 19:10:41 +0100",
+      "minecraft:swamp": "2025-02-24 19:28:33 +0100",
+      "minecraft:plains": "2025-02-24 19:24:23 +0100"
+    },
+    "done": false
+  },
+  "DataVersion": 3955
+}

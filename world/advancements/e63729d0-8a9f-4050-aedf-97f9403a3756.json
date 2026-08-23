@@ -1,0 +1,24 @@
+{
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2024-12-31 02:50:53 +0100"
+    },
+    "done": true
+  },
+  "minecraft:adventure/sleep_in_bed": {
+    "criteria": {
+      "slept_in_bed": "2024-12-31 02:55:28 +0100"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:beach": "2024-12-31 02:51:10 +0100",
+      "minecraft:forest": "2024-12-31 02:51:12 +0100",
+      "minecraft:river": "2024-12-31 02:51:39 +0100",
+      "minecraft:lukewarm_ocean": "2024-12-31 02:50:54 +0100"
+    },
+    "done": false
+  },
+  "DataVersion": 3955
+}
