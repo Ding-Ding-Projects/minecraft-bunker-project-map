@@ -152,8 +152,9 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
           java -jar $jar -c config
-          if ($LASTEXITCODE -ne 0) {
-            throw 'BlueMap failed to generate its configuration.'
+          if (-not (Test-Path -LiteralPath config/core.conf -PathType Leaf) -or
+              -not (Test-Path -LiteralPath config/maps/overworld.conf -PathType Leaf)) {
+            throw 'BlueMap did not generate the expected configuration files.'
           }
           Remove-Item -LiteralPath config/maps/end.conf,config/maps/nether.conf,config/maps/overworld.conf -Force
           @"
@@ -293,8 +294,9 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $jar = "tools/bluemap-$env:BLUEMAP_VERSION-cli.jar"
           java -jar $jar -c config
-          if ($LASTEXITCODE -ne 0) {
-            throw 'BlueMap failed to generate assembly configuration.'
+          if (-not (Test-Path -LiteralPath config/core.conf -PathType Leaf) -or
+              -not (Test-Path -LiteralPath config/maps/overworld.conf -PathType Leaf)) {
+            throw 'BlueMap did not generate the expected assembly configuration files.'
           }
           Remove-Item -LiteralPath config/maps/end.conf,config/maps/nether.conf,config/maps/overworld.conf -Force
           @"
