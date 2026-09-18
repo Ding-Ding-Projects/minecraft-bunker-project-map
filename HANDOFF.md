@@ -3,45 +3,49 @@
 ## Current state
 
 - Repository: `Ding-Ding-Projects/minecraft-bunker-project-map`
-- Working branch: `contamination-update-part-1`
-- Starting commit: `e006dd9f5d919ffe4cb5008c73205073e54fec74`
-- Common base with `main`: `c648a1a763ac9938188f558c8f9e7f94ac2e8d2a`
-- Starting `main` tip: `2a9e9e117653bf98c07e8a046c5722bf445310b2`
-- Starting state: clean, with no unmerged index entries and no conflict markers.
-- Merge result: `AGENTS.md` required an add/add resolution. The existing repository-specific
-  prohibition block was retained first, followed by the incoming vocabulary-discipline block.
-  No content from either side was discarded.
+- Preservation branch: `contamination-update-part-1`
+- Preservation commit: `886651180af6fd4cdc2afcf8a752de01b83f1e05`
+- Merge commit: `515c55db48501d509368732789b33828b95a9c26`
+- Common base: `c648a1a763ac9938188f558c8f9e7f94ac2e8d2a`
+- Starting `main` commit: `2a9e9e117653bf98c07e8a046c5722bf445310b2`
 
-This branch carries the contamination-update-part-1 world snapshot. The snapshot includes
-tracked world data and the three Paper JAR files under `world/versions/`. No unrelated release
-work is part of this handoff.
+The update contains the contamination-update-part-1 world snapshot, including tracked world
+data and the Paper JAR files under `world/versions/`. Release and installer work is outside
+this pass.
 
-## Integration decision
+## Conflict resolution
 
-The branch and `main` both contain work after the common base. The completed branch will be
-merged into `main` with a normal merge, preserving both lines in the resulting history. Any
-conflict will be resolved by keeping the complete meaning of both sides, then checked for
-remaining unmerged index entries and conflict markers.
+The merge had an add/add conflict in `AGENTS.md`. The existing repository-specific prohibition
+was retained first, followed by the incoming public vocabulary-discipline block. No text from
+either block was discarded.
 
-## Verification plan
+The merge tree also contained inherited conflict-marker text in 13 world JSON files and in
+earlier versions of this handoff and roadmap. The JSON records were repaired by parsing both
+sides, combining object keys recursively, retaining the greatest numeric progress counter,
+retaining the later timestamp when two timestamps differed, and retaining both array values.
+All repaired JSON files parse successfully, and a repository-wide marker scan is clean.
 
-1. Fetch `origin` before changes.
-2. Commit and publish this preservation documentation on the current branch.
-3. Verify the branch ref with `git ls-remote`.
-4. Merge the completed branch into `main`.
-5. Update this handoff and `ROADMAP.md` with the final merge commit.
-6. Publish `main` and verify its remote ref with `git ls-remote`.
-7. Create and test the required external archive before any cleanup decision.
+## Remote state
 
-## Conflict record
+The preservation branch was published and verified at `886651180af6fd4cdc2afcf8a752de01b83f1e05`.
+The `main` branch still needs its final publication and remote-reference verification.
 
-The only merge conflict was `AGENTS.md`, an add/add conflict. The resolution retains both
-public instruction blocks, with the repository-specific prohibition first and the incoming
-vocabulary-discipline block second. Validation requires zero unmerged index entries and zero
-conflict markers.
+## Archive and cleanup
 
-## Retained work
+No stash entries were present in the initial inventory. Before any removal, create and verify
+the dated external archive under `<OneDrive>\OakKayBackups\contamination-update-part-1\zips\`.
+The archive must include the Git administrative directory, all tracked files, and all
+non-ignored untracked files. Record its path, byte size, entry count, and full integrity-test
+result here.
 
-Other local branches and linked worktrees are outside this task's ownership boundary. They are
-retained unless a later inventory proves a specific item is redundant, merged, published, and
-safe to remove.
+All other local branches and linked working directories are retained because they are outside
+this task's ownership boundary. The pre-existing untracked file
+`world/worldlens.project.json` in `royalty-update` is also retained.
+
+## Remaining actions
+
+1. Validate every JSON file and the final marker scan.
+2. Commit this corrective handoff, roadmap, and data repair.
+3. Publish `main` and verify the exact remote reference with `git ls-remote`.
+4. Create and verify the external archive.
+5. Remove nothing unless ownership, publication, ancestry, and redundancy are all proven.
