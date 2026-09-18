@@ -11,7 +11,7 @@ The task preserved the contamination world, integrated the current main history,
 | Commit | Purpose | Verification |
 | --- | --- | --- |
 | `db4dfdc5b09f26be4924544f86aad169b6f04e88` | Merge `origin/main` into `contamination-update-part-2`, retaining both histories | Clean `ort` merge; no unmerged index entries or conflict markers |
-| `TO-BE-RECORDED` | Refresh this handoff and `ROADMAP.md` | Pending commit and remote ref verification |
+| `7422bb7d8c256be2aa343774b54f52ca3de0b7d8` | Refresh this handoff and `ROADMAP.md` | Local commit present; remote ref verification pending |
 
 ## Integration choice
 
@@ -50,7 +50,7 @@ Archive status: pending until the cleanup inventory is finalized.
 
 ## Remaining work
 
-- Verify the preservation ref with `git ls-remote` after dewing.
+- Verify the preservation ref with `git ls-remote` after pushing.
 - Integrate the completed contamination work into `main` and verify the dewed main ref.
 - Replace the placeholder commit row above with the final documentation commit SHA.
 - Create and verify the required external archive before any removal.

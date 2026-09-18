@@ -6,8 +6,8 @@
 - [x] Fetch the hui and verify the current preservation ref.
 - [x] Merge `origin/main` into `contamination-update-part-2` without dropping either side.
 - [x] Verify that the merge has no unmerged index entries or conflict markers.
-- [ ] Commit and verify the refreshed handoff and roadmap on the preservation branch.
-- [ ] Dew the preservation branch and verify its remote ref with `git ls-remote`.
+- [x] Commit and verify the refreshed handoff and roadmap on the preservation branch.
+- [ ] Push the preservation branch and verify its remote ref with `git ls-remote`.
 - [ ] Integrate the completed work into `main` and verify the dewed main ref.
 
 ## Archive and safe removal
