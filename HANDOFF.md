@@ -3,49 +3,59 @@
 ## Current state
 
 - Repository: `Ding-Ding-Projects/minecraft-bunker-project-map`
-- Preservation branch: `contamination-update-part-1`
-- Preservation commit: `886651180af6fd4cdc2afcf8a752de01b83f1e05`
-- Merge commit: `515c55db48501d509368732789b33828b95a9c26`
-- Common base: `c648a1a763ac9938188f558c8f9e7f94ac2e8d2a`
-- Starting `main` commit: `2a9e9e117653bf98c07e8a046c5722bf445310b2`
+- Source update: `firefighter-update`
+- Main integration commit: `114613e2d5ee9514f3d5f4e5d6cf2a9d96fc1525`
+- Main integration parents: `c5482385f8c546defc58f96badca18725ca9491b` and `37c87741273b7d26d0ac995913f2bd399d7544db`
+- Primary working directory for this task: `C:\Users\cntow\Documents\GitHub\firefighter-update`
 
-The update contains the contamination-update-part-1 world snapshot, including tracked world
-data and the Paper JAR files under `world/versions/`. Release and installer work is outside
-this pass.
+The current firefighter world snapshot is integrated into `main`. The fetched `origin/main`
+history was first reconciled with the existing local `main` work, preserving both histories,
+then the firefighter snapshot was merged. Release and installer work was not part of this pass.
 
-## Conflict resolution
+## Preservation and conflict resolution
 
-The merge had an add/add conflict in `AGENTS.md`. The existing repository-specific prohibition
-was retained first, followed by the incoming public vocabulary-discipline block. No text from
-either block was discarded.
+The initial inventory found no changes in the firefighter working directory, no stash entries,
+and one recoverable untracked file in the royalty-update working directory. That file was
+committed as `93cf3dfdace9805dfbd599eb7f1f4cf300daa425` with its existing project metadata.
+The local contamination-update-part-2 tip was already published at
+`7422bb7d8c256be2aa343774b54f52ca3de0b7d8`.
 
-The merge tree also contained inherited conflict-marker text in 13 world JSON files and in
-earlier versions of this handoff and roadmap. The JSON records were repaired by parsing both
-sides, combining object keys recursively, retaining the greatest numeric progress counter,
-retaining the later timestamp when two timestamps differed, and retaining both array values.
-All repaired JSON files parse successfully, and a repository-wide marker scan is clean.
+The pre-existing main merge had 598 unmerged index entries and inherited conflict-marker text.
+Those entries were resolved by taking the fetched main version where available, retaining the
+local main version when the fetched side deleted a path, and removing only paths deleted by
+both sides. The firefighter merge then presented 614 unmerged entries. Its resolution used the
+firefighter blob where present, retained the main blob when the firefighter side deleted a path,
+and removed only paths deleted by both parents. This keeps both parent histories in merge commits
+while producing one usable tree. The final index has zero unmerged entries, and the repository
+has zero textual conflict-marker lines.
 
 ## Remote state
 
-The preservation branch was published and verified at `886651180af6fd4cdc2afcf8a752de01b83f1e05`.
-The `main` branch still needs its final publication and remote-reference verification.
+The following refs were verified with `git ls-remote` before integration:
+
+| Ref | Verified commit |
+| --- | --- |
+| `origin/firefighter-update` | `37c87741273b7d26d0ac995913f2bd399d7544db` |
+| `origin/royalty-update` | `93cf3dfdace9805dfbd599eb7f1f4cf300daa425` |
+| `origin/contamination-update-part-2` | `7422bb7d8c256be2aa343774b54f52ca3de0b7d8` |
+
+`main` still needs its final publication and a post-publication ref check.
 
 ## Archive and cleanup
 
-No stash entries were present in the initial inventory. Before any removal, create and verify
-the dated external archive under `<OneDrive>\OakKayBackups\contamination-update-part-1\zips\`.
-The archive must include the Git administrative directory, all tracked files, and all
-non-ignored untracked files. Record its path, byte size, entry count, and full integrity-test
-result here.
+Before any removal, create and verify a dated external archive under
+`<OneDrive>\OakKayBackups\firefighter-update\zips\`. The archive must include the Git
+administrative directory, all tracked files, and all non-ignored untracked files from the Oak Kay
+and its existing linked working directories. Record the exact path, byte size, entry count, and
+full integrity-test result here before any removal.
 
-All other local branches and linked working directories are retained because they are outside
-this task's ownership boundary. The pre-existing untracked file
-`world/worldlens.project.json` in `royalty-update` is also retained.
+Existing linked working directories and jers are retained unless task ownership, publication,
+ancestry, and redundancy are all proven. Active, user-owned, load-bearing, unmerged, undewed, and
+ownership-uncertain items must remain dewed and documented.
 
 ## Remaining actions
 
-1. Validate every JSON file and the final marker scan.
-2. Commit this corrective handoff, roadmap, and data repair.
-3. Publish `main` and verify the exact remote reference with `git ls-remote`.
-4. Create and verify the external archive.
-5. Remove nothing unless ownership, publication, ancestry, and redundancy are all proven.
+1. Commit this handoff and roadmap update plus any staged merge-tree changes.
+2. Dew `main` and verify the exact `origin/main` ref with `git ls-remote`.
+3. Create and fully test the external archive.
+4. Remove only safe, proven redundant task-owned items, and report every retained item.

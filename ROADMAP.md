@@ -2,25 +2,26 @@
 
 ## Preservation and integration
 
-- [x] Fetch `origin` and inventory the current checkout, branches, linked working directories, and stashes.
-- [x] Confirm the initial checkout had no uncommitted files or unresolved index entries.
-- [x] Commit and publish the preservation record on `contamination-update-part-1`.
-- [x] Merge the completed update into `main` while preserving both histories.
-- [x] Resolve the `AGENTS.md` add/add conflict without dropping either public instruction block.
-- [x] Repair inherited conflict-marker text in the affected world JSON records.
-- [x] Validate repaired JSON records and confirm the repository-wide marker scan is clean.
-- [ ] Commit and publish the corrective repair.
-- [ ] Publish `main` and verify the exact remote reference.
+- [x] Fetch `origin` and inventory the current checkout, refs, linked working directories, and stashes.
+- [x] Confirm the firefighter working directory had no uncommitted changes before integration.
+- [x] Preserve the untracked royalty render project metadata in commit `93cf3df`.
+- [x] Verify preserved branch refs with `git ls-remote`.
+- [x] Reconcile the existing local `main` divergence without dropping either parent history.
+- [x] Merge the completed `firefighter-update` snapshot into `main`.
+- [x] Remove all unmerged index entries and textual conflict markers.
+- [x] Record non-obvious conflict choices in `HANDOFF.md`.
+- [ ] Commit the final handoff, roadmap, and staged merge-tree changes.
+- [ ] Dew `main` and verify `origin/main`.
 
 ## Archive and safe removal
 
-- [ ] Create the required dated external archive under `<OneDrive>\OakKayBackups\contamination-update-part-1\zips\`.
-- [ ] Read the archive back and record its path, byte size, entry count, and integrity-test result in `HANDOFF.md`.
-- [ ] Remove only task-owned, published, ancestry-proven, redundant working directories, branches, and stashes.
-- [ ] Retain active, user-owned, load-bearing, unmerged, unpublished, and ownership-uncertain work.
+- [ ] Create the dated external archive under `<OneDrive>\OakKayBackups\firefighter-update\zips\`.
+- [ ] Read the archive back and pass a full integrity test before any removal.
+- [ ] Record archive path, byte size, entry count, excluded ignored-path count, and integrity result.
+- [ ] Remove only task-owned, published, ancestry-proven, redundant working directories, jers, and Lap Sap Tongs.
+- [ ] Retain active, user-owned, load-bearing, unmerged, undewed, and ownership-uncertain items.
 
 ## Exclusions
 
 - Release publication, installer work, and unrelated product changes are outside this task.
-- Pre-existing linked working directories are not cleanup candidates unless ownership and ancestry are proven for this task.
-- The untracked `world/worldlens.project.json` in `royalty-update` remains untouched.
+- Existing linked working directories remain protected until ownership and redundancy are proven.
