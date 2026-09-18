@@ -11,7 +11,7 @@ The task preserved the contamination world, integrated the current main history,
 | Commit | Purpose | Verification |
 | --- | --- | --- |
 | `db4dfdc5b09f26be4924544f86aad169b6f04e88` | Merge `origin/main` into `contamination-update-part-2`, retaining both histories | Clean `ort` merge; no unmerged index entries or conflict markers |
-| `7422bb7d8c256be2aa343774b54f52ca3de0b7d8` | Refresh this handoff and `ROADMAP.md` | Local commit present; remote ref verification pending |
+| `7422bb7d8c256be2aa343774b54f52ca3de0b7d8` | Refresh this handoff and `ROADMAP.md` | Dewed to both `origin/contamination-update-part-2` and `origin/main`; verified with `git ls-remote` |
 
 ## Integration choice
 
@@ -46,12 +46,12 @@ The `royalty-update` file is retained because it is outside this task’s owners
 
 The repository had no Git stashes at inventory time. Before any removal, create and verify a dated archive under `<OneDrive>\OakKayBackups\contamination-update-part-2\zips\`. The archive must include the Git administrative directory plus all tracked and non-ignored untracked files, and must record its byte size, entry count, and verification result here.
 
-Archive status: pending until the cleanup inventory is finalized.
+Archive status: verified. The valid external archive is `C:\Users\cntow\OneDrive\OakKayBackups\contamination-update-part-2\zips\contamination-update-part-2-20260918T170100Z.7z`, with `8,367,914,924` bytes and `2,114` listed entries. `7z t` returned exit code 0. The listing includes both `__git/common` and `__git/current-worktree`. The archive was created locally, tested, copied to HuiDrive, and tested again in place.
+
+Two earlier dated files in the same folder are invalid partial compression outputs from failed attempts: `contamination-update-part-2-20260918T164621Z.7z` (`5,083,928,914` bytes) and `contamination-update-part-2-20260918T165500Z.7z` (`1,305,767,202` bytes). They failed the archive-open test and are excluded from evidence.
 
 ## Remaining work
 
-- Verify the preservation ref with `git ls-remote` after pushing.
-- Integrate the completed contamination work into `main` and verify the dewed main ref.
-- Replace the placeholder commit row above with the final documentation commit SHA.
-- Create and verify the required external archive before any removal.
-- Remove only task-owned, proven-redundant items. Retain the pre-existing linked checkouts and the untracked `world/worldlens.project.json` path.
+- The preservation ref and `main` both resolve to `7422bb7d8c256be2aa343774b54f52ca3de0b7d8` on the hui, verified with `git ls-remote`.
+- No safe removal candidate was identified. All existing linked checkouts predate this task, and `royalty-update` contains the user-owned untracked `world/worldlens.project.json` path.
+- No Git stashes were present at inventory time.
