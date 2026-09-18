@@ -49,9 +49,9 @@ administrative directory, all tracked files, and all non-ignored untracked files
 and its existing linked working directories. Record the exact path, byte size, entry count, and
 full integrity-test result here before any removal.
 
-Existing linked working directories and jers are retained unless task ownership, publication,
-ancestry, and redundancy are all proven. Active, user-owned, load-bearing, unmerged, undewed, and
-ownership-uncertain items must remain dewed and documented.
+Existing linked working directories and branches are retained unless task ownership, publication,
+ancestry, and redundancy are all proven. Active, user-owned, load-bearing, unmerged, unpublished,
+and ownership-uncertain items must remain preserved and documented.
 
 ## Remaining actions
 

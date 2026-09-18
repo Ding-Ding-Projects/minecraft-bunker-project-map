@@ -18,8 +18,8 @@
 - [ ] Create the dated external archive under `<OneDrive>\OakKayBackups\firefighter-update\zips\`.
 - [ ] Read the archive back and pass a full integrity test before any removal.
 - [ ] Record archive path, byte size, entry count, excluded ignored-path count, and integrity result.
-- [ ] Remove only task-owned, published, ancestry-proven, redundant working directories, jers, and Lap Sap Tongs.
-- [ ] Retain active, user-owned, load-bearing, unmerged, undewed, and ownership-uncertain items.
+- [ ] Remove only task-owned, published, ancestry-proven, redundant working directories, branches, and stashes.
+- [ ] Retain active, user-owned, load-bearing, unmerged, unpublished, and ownership-uncertain items.
 
 ## Exclusions
 
