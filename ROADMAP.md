@@ -2,25 +2,22 @@
 
 ## Preservation and integration
 
-- [x] Fetch `origin` and inventory the current checkout, refs, linked working directories, and stashes.
-- [x] Preserve recoverable changes and half-finished work in factual bilingual commits.
-- [x] Verify preservation refs with `git ls-remote` where each ref was published.
+- [x] Fetch `origin` and inventory the checkout, refs, linked working directories, and stashes.
+- [x] Preserve the royalty render project metadata in `93cf3dfdace9805dfbd599eb7f1f4cf300daa425`.
 - [x] Reconcile the existing local `main` history without dropping either parent history.
-- [x] Merge the firefighter and contamination world snapshots into the integrated line.
+- [x] Integrate the firefighter snapshot into `main`.
 - [x] Resolve all unmerged index entries and textual conflict markers.
-- [x] Record non-obvious conflict choices in `HANDOFF.md`.
-- [x] Commit this combined handoff and roadmap after the merge resolution.
-- [x] Publish `main` and verify the exact remote ref.
+- [x] Record conflict choices and retained items in `HANDOFF.md`.
+- [x] Publish `main` and verify `56497514248ba52493d820ea4d83b9125e33d9c0` with `git ls-remote`.
+- [ ] Publish this refreshed handoff and roadmap commit, then verify its ref.
 
 ## Archive and safe removal
 
-- [x] Create and verify the dated external archive under `<OneDrive>\OakKayBackups\contamination-update-part-2\zips\`.
-- [x] Record the valid archive path, byte size, entry count, and integrity result in `HANDOFF.md`.
-- [x] Confirm that no safe, task-owned, proven-redundant checkout, ref, or stash is available for removal.
-- [x] Retain active, user-owned, load-bearing, unmerged, unpublished, and ownership-uncertain work.
+- [x] Verify the external archive with a full `7z t` integrity test.
+- [x] Record archive size, entry count, and integrity result in `HANDOFF.md`.
+- [x] Retain active, user-owned, load-bearing, unmerged, unpublished, and ownership-uncertain items.
+- [x] Make no removal where task ownership and redundancy are not proven together.
 
 ## Exclusions
 
 - Release publication, installer work, and unrelated product changes are outside this task.
-- Existing linked working directories remain protected until ownership and redundancy are proven.
-- Invalid partial archive outputs remain identified as failed evidence and are not used as backups.

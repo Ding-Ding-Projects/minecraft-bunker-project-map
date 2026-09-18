@@ -3,57 +3,52 @@
 ## Current state
 
 - Repository: `Ding-Ding-Projects/minecraft-bunker-project-map`
-- Active checkout: `C:\Users\cntow\Documents\GitHub\minecraft bunker project map`
-- Current branch: `main`
-- This checkout contains the firefighter integration, the contamination part 1 and part 2 integrations, and the preserved concurrent main updates.
-- Release and installer work are outside this task.
+- Integrated source: `firefighter-update`
+- Current `main` commit: `56497514248ba52493d820ea4d83b9125e33d9c0`
+- Verified remote `main`: `56497514248ba52493d820ea4d83b9125e33d9c0`
+- Release and installer work: out of scope for this pass
 
-## Preservation commits
+The firefighter world snapshot is integrated into `main`. The contamination integration and
+the existing local main history were retained as merge parents. The working directory is now
+being restored to a documented, ordinary-language handoff after a recoverable documentation
+deletion.
 
-| Commit | Purpose | Verification |
+## Preservation commits and refs
+
+| Ref or commit | Purpose | Verification |
 | --- | --- | --- |
-| `93cf3dfdace9805dfbd599eb7f1f4cf300daa425` | Preserve the royalty render project metadata | Published on `origin/royalty-update` |
-| `93bb755` | Preserve concurrent main world updates | Present in the active local `main` history |
-| `6494d1d` | Preserve the active main checkout handoff wording | Committed before this reconciliation |
-| `db4dfdc5b09f26be4924544f86aad169b6f04e88` | Merge main release metadata into contamination part 2 | Clean merge |
-| `7422bb7d8c256be2aa343774b54f52ca3de0b7d8` | Publish the contamination part 2 handoff and roadmap | Verified on the remote before the later documentation update |
-| `90542430a3d644817866677a81f93e4e2fded08b` | Preserve the contamination handoff before the final documentation update | Ancestor of the final contamination tip |
-| `b402553cb8a89f64fd112ee659986a77286e3a4a` | Record the verified contamination archive and integration state | Verified on `origin/main` and `origin/contamination-update-part-2` |
+| `37c87741273b7d26d0ac995913f2bd399d7544db` | Firefighter world snapshot | `origin/firefighter-update` verified with `git ls-remote` |
+| `93cf3dfdace9805dfbd599eb7f1f4cf300daa425` | Royalty render project metadata | `origin/royalty-update` verified with `git ls-remote` |
+| `7422bb7d8c256be2aa343774b54f52ca3de0b7d8` | Contamination integration preservation | `origin/contamination-update-part-2` ancestry retained |
+| `56497514248ba52493d820ea4d83b9125e33d9c0` | Integrated main history | `origin/main` verified with `git ls-remote` |
 
-## Integration and conflict resolution
+The recoverable deletion of this handoff and roadmap is being committed separately with a
+bilingual public message. No stash entries were present in the inventory.
 
-The active main checkout reconciled its local history with the published contamination integration. Both parent histories are retained in the merge commit. The world-file conflict resolutions used the available current blob, retained a local blob when the other side deleted the path, and removed a path only when both parents deleted it. This preserves both sides in Git history while producing one usable tree.
+## Conflict resolution
 
-The documentation conflicts were resolved by combining the firefighter preservation record with the contamination integration record, including the archive receipt and the final retention decision. No conflict marker was retained.
+The existing main reconciliation contained 598 unmerged index entries. The firefighter merge
+contained 614 unmerged entries. Resolution retained both parent histories in merge commits.
+Where both parents had a file, the incoming snapshot was selected. Where the incoming side
+deleted a path, the existing main file was retained. Paths deleted by both parents were removed.
+The final checks reported zero unmerged index entries and zero textual conflict-marker lines.
 
-The earlier main reconciliation reported 598 unmerged index entries, followed by 614 entries during the firefighter merge. Those entries were resolved before this task's final merge. The final verification must report zero unmerged entries and zero textual conflict-marker lines.
+## Archive evidence
 
-## Remote state
-
-The final `main` ref is `56497514248ba52493d820ea4d83b9125e33d9c0`, verified with `git ls-remote`. The `contamination-update-part-2` ref remains `b402553cb8a89f64fd112ee659986a77286e3a4a`, also verified with `git ls-remote`. Both preservation lines are published.
-
-## Archive
-
-The verified external archive for the contamination primary checkout is:
+The verified external archive for this repository is:
 
 `C:\Users\cntow\OneDrive\OakKayBackups\contamination-update-part-2\zips\contamination-update-part-2-20260918T170100Z.7z`
 
-It is `8,367,914,924` bytes with `2,114` listed entries. `7z t` returned exit code 0. Its listing contains both `__git/common` and `__git/current-worktree`. It was created locally, tested, copied to OneDrive, and tested again in place.
+It is `8,367,914,924` bytes. A full `7z t` returned exit code `0`, with `1,967` files and
+`146` folders. The archive listing contains `2,114` path entries, including the Git administrative
+directory under `__git`. The archive is retained as the verified backstop before any removal.
 
-Two earlier dated files in that folder are invalid partial compression outputs and are excluded from evidence: `contamination-update-part-2-20260918T164621Z.7z` (`5,083,928,914` bytes) and `contamination-update-part-2-20260918T165500Z.7z` (`1,305,767,202` bytes). They failed the archive-open test.
+## Retained items and exclusions
 
-No removal is permitted without a valid archive receipt. The archive above is the backstop for the contamination primary checkout and shared Git administration; the active main checkout's subsequent preservation commit is documented separately in its local history.
+All existing linked working directories and branches are retained because task ownership and
+redundancy were not proven for them. The royalty working directory contained user-owned project
+metadata and was preserved in commit `93cf3dfdace9805dfbd599eb7f1f4cf300daa425`. No stash was
+present. No safe redundant directory, branch, or stash was identified for removal.
 
-## Retained linked checkouts
-
-All existing linked checkouts predate this task and remain retained unless ownership, ancestry, and redundancy are proven together. The active local `main` checkout currently has a separate local history and must not be overwritten. At final inventory it contained no uncommitted files after its preservation commit, but its local `main` ref was ahead 8 and behind 2 relative to the remote ref pending this merge and publication.
-
-The separate `royalty-update` checkout and its preserved metadata remain outside this task's ownership. No Git stashes were present at inventory time. No safe task-owned redundant checkout or ref was identified for removal.
-
-## Final checks
-
-- [x] Verify the final merge has no unmerged index entries.
-- [x] Verify the final tree has no textual conflict markers.
-- [x] Publish `main` and verify the exact remote ref with `git ls-remote`.
-- [x] Publish every preservation branch and verify each exact ref with `git ls-remote`.
-- [x] Retain active, user-owned, load-bearing, unpublished, and ownership-uncertain items.
+Release publication, installer work, unrelated product changes, and ownership-uncertain cleanup
+remain excluded.
