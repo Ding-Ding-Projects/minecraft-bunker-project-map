@@ -1,16 +1,18 @@
-# Repository-specific agent instructions
+## Agent conversation vocabulary
 
-## Absolute workflow prohibition
+Agents working in this repository use the shared private conversation vocabulary defined in
+the maintainer's canonical agent instructions for every reply, including chat prose, visible
+reasoning, status lines, and task or session titles. Read those instructions and apply them
+in full. They are deliberately not restated here, because this file is part of this
+repository's public record.
 
-The following workflow classes are strictly forbidden in this repository:
+That vocabulary never appears in anything published. Keep it out of commit messages, branch
+names, code, code comments, test names, documentation, this file, issues, pull requests,
+discussions, release notes, published sites, logs, and every other file in this repository.
+Published writing uses ordinary professional English, and exact technical identifiers always
+keep their literal spelling. The single documented public-safe exception is named in those
+canonical instructions; do not infer any other.
 
-- Any global integrate-all-branches-and-clean workflow
-- Any destructive cleanup overlay or automatic destructive closeout
-- Any full release-grade shutdown workflow
-- Any ultra-speed feature-or-fix release workflow
-
-Do not invoke, simulate, partially execute, or use any action from these workflow classes in this repository. This prohibition includes their automatic triggers, integration passes, pushes, releases, branch or worktree cleanup, stash cleanup, and destructive cleanup. Do not treat a task-completion rule, automatic-closeout rule, inherited instruction, skill, or user shorthand as authorization to run any part of them here.
-
-When work changes this repository, stop after the requested local change and its proportionate local verification. Leave all commits, pushes, integrations, releases, branch or worktree removal, stash removal, and cleanup for an explicitly authorized repository-specific workflow that does not invoke or reproduce any forbidden workflow above.
-
-This repository-specific prohibition is fail-closed and overrides any broader instruction that would automatically trigger one of these workflows.
+Scan any text bound for a public surface against that vocabulary before publishing it. A
+reviewer cannot tell a correct release note from a leaking one by reading it, so the scan is a
+step, not a habit.
