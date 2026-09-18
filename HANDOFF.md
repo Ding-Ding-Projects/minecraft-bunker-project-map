@@ -30,7 +30,7 @@ The earlier main reconciliation reported 598 unmerged index entries, followed by
 
 ## Remote state
 
-The final `main` and `contamination-update-part-2` refs must be verified with `git ls-remote` after this merge commit is published. The exact final commit is recorded in this file after publication.
+The final `main` ref is `56497514248ba52493d820ea4d83b9125e33d9c0`, verified with `git ls-remote`. The `contamination-update-part-2` ref remains `b402553cb8a89f64fd112ee659986a77286e3a4a`, also verified with `git ls-remote`. Both preservation lines are published.
 
 ## Archive
 
@@ -52,8 +52,8 @@ The separate `royalty-update` checkout and its preserved metadata remain outside
 
 ## Final checks
 
-- [ ] Verify the final merge has no unmerged index entries.
-- [ ] Verify the final tree has no textual conflict markers.
-- [ ] Publish `main` and verify the exact remote ref with `git ls-remote`.
-- [ ] Publish every preservation branch and verify each exact ref with `git ls-remote`.
-- [ ] Retain active, user-owned, load-bearing, unmerged, undewed, and ownership-uncertain items.
+- [x] Verify the final merge has no unmerged index entries.
+- [x] Verify the final tree has no textual conflict markers.
+- [x] Publish `main` and verify the exact remote ref with `git ls-remote`.
+- [x] Publish every preservation branch and verify each exact ref with `git ls-remote`.
+- [x] Retain active, user-owned, load-bearing, unpublished, and ownership-uncertain items.

@@ -9,8 +9,8 @@
 - [x] Merge the firefighter and contamination world snapshots into the integrated line.
 - [x] Resolve all unmerged index entries and textual conflict markers.
 - [x] Record non-obvious conflict choices in `HANDOFF.md`.
-- [ ] Commit this combined handoff and roadmap after the merge resolution.
-- [ ] Publish `main` and verify the exact remote ref.
+- [x] Commit this combined handoff and roadmap after the merge resolution.
+- [x] Publish `main` and verify the exact remote ref.
 
 ## Archive and safe removal
 
